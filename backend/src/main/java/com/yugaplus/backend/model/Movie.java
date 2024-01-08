@@ -5,5 +5,5 @@ import java.sql.Date;
 public record Movie(
         Integer id, String title,
         String overview, Date releaseDate,
-        Number popularity, Integer voteCount, Number voteAverage) {
+        Number popularity, Number voteAverage) {
 }
