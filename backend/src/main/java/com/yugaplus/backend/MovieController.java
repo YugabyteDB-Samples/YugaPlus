@@ -47,14 +47,13 @@ public class MovieController {
     @GetMapping("/search")
     public List<Movie> searchMovies(@RequestParam("prompt") String prompt) {
         if (enableAiSearch) {
-            List<Double> embeddingResponse = aiClient.embed(prompt);
-            String promptEmbedding = embeddingResponse.toString();
+            List<Double> promptEmbedding = aiClient.embed(prompt);
 
             return jdbcClient.sql(
                     "SELECT id,title, overview,popularity,vote_average,release_date " +
                             "FROM movie WHERE 1 - (overview_vector <=> :prompt_vector::vector) >= 0.7 " +
                             "ORDER BY overview_vector <=> :prompt_vector::vector LIMIT 3")
-                    .param("prompt_vector", promptEmbedding).query(Movie.class).list();
+                    .param("prompt_vector", promptEmbedding.toString()).query(Movie.class).list();
         } else {
             return jdbcClient.sql(
                     "SELECT id,title, overview,popularity,vote_average,release_date " +
