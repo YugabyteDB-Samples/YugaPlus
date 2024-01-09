@@ -28,54 +28,6 @@ A sample streaming service with your favorite movies and series. Built on Yugaby
     docker container ls -f name=postgres
     ```
 
-## Load Application Dataset
-
-The application uses a [movies dataset](https://huggingface.co/datasets/denismagda/movies/blob/main/README.md) comprising over 45,000 movies and 26 million ratings from more than 270,000 users. The dataset includes pre-generated embeddings for the movies' overviews, which were generated with the OpenAI `text-embedding-ada-002` model.
-
-Load the dataset to the Postgres container:
-
-1. Connect to the Postgres container:
-    ```shell
-    docker exec -it postgres /bin/bash
-    ```
-
-2. Install the `wget` tool within the container:
-    ```shell
-    apt update && apt-get install wget
-    ```
-
-3. Download the schema and data files from the HuggingFace to the container's `/home` directory:
-    ```shell
-    wget https://huggingface.co/datasets/denismagda/movies/raw/main/movie_schema.sql -P /home
-    wget https://huggingface.co/datasets/denismagda/movies/resolve/main/movie_data_with_openai_embeddings.sql -P /home
-    ```
-    Note, it can take a minute to download the data file as long as it's size is ~ 900MB.
-
-4. Connect to the database with `psql`:
-    ```shell
-    psql -U postgres
-    ```
-
-5. Enable the pgvector extension:
-    ```shell
-    create extension vector;
-    ```
-
-6. Load the dataset:
-    ```sql
-    \i /home/movie_schema.sql
-    \i /home/movie_data_with_openai_embeddings.sql
-    ```
-    Note, it can take several minutes to load the data file.
-
-Once the data is loaded, check that you have more than 45,000 movies in the database:
-```sql
-select count(*) from movie;
- count
--------
- 45426
-```
-
 ## Test the App
 
 ```shell
