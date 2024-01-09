@@ -80,4 +80,8 @@ select count(*) from movie;
 
 ```shell
 http GET :8080/api/movie/search prompt=='A movie about a space adventure.'
+
+http GET :8080/api/movie/search rank==7 prompt=='A movie about a space adventure.'
+
+http GET :8080/api/movie/search rank==7 category=='Science Fiction' prompt=='A movie about a space adventure.'
 ```

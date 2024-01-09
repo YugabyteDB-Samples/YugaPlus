@@ -4,7 +4,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yugaplus.backend.model.Movie;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,47 +20,72 @@ import org.springframework.ai.embedding.EmbeddingClient;
 @RestController
 @RequestMapping("/api/movie")
 public class MovieController {
-    JdbcClient jdbcClient;
+	private static final Number SIMILARITY_THRESHOLD = 0.7;
+	private static final Integer MAX_RESULTS = 3;
 
-    private EmbeddingClient aiClient;
+	private JdbcClient jdbcClient;
 
-    private boolean enableAiSearch;
+	private EmbeddingClient aiClient;
 
-    @Autowired
-    public MovieController(
-            @Value("${spring.ai.openai.api-key}") String openAiApiKey,
-            EmbeddingClient aiClient,
-            JdbcClient jdbcClient) {
+	private boolean enableAiSearch;
 
-        enableAiSearch = openAiApiKey != null && !openAiApiKey.isBlank()
-                && !openAiApiKey.equals("your-api-key");
+	public MovieController(
+			@Value("${spring.ai.openai.api-key:#{null}}") String openAiApiKey,
+			@Autowired(required = false) EmbeddingClient aiClient,
+			JdbcClient jdbcClient) {
 
-        this.aiClient = aiClient;
-        this.jdbcClient = jdbcClient;
-    }
+		enableAiSearch = openAiApiKey != null && !openAiApiKey.isBlank()
+				&& !openAiApiKey.equals("your-api-key");
 
-    @GetMapping("/{id}")
-    public Movie getMovieById(@PathVariable Integer id) {
-        return jdbcClient.sql(
-                "SELECT * FROM movie WHERE id = ?")
-                .param(id).query(Movie.class).single();
-    }
+		this.aiClient = aiClient;
+		this.jdbcClient = jdbcClient;
+	}
 
-    @GetMapping("/search")
-    public List<Movie> searchMovies(@RequestParam("prompt") String prompt) {
-        if (enableAiSearch) {
-            List<Double> promptEmbedding = aiClient.embed(prompt);
+	@GetMapping("/{id}")
+	public Movie getMovieById(@PathVariable Integer id) {
+		return jdbcClient.sql(
+				"SELECT * FROM movie WHERE id = ?")
+				.param(id).query(Movie.class).single();
+	}
 
-            return jdbcClient.sql(
-                    "SELECT id,title, overview,popularity,vote_average,release_date " +
-                            "FROM movie WHERE 1 - (overview_vector <=> :prompt_vector::vector) >= 0.7 " +
-                            "ORDER BY overview_vector <=> :prompt_vector::vector LIMIT 3")
-                    .param("prompt_vector", promptEmbedding.toString()).query(Movie.class).list();
-        } else {
-            return jdbcClient.sql(
-                    "SELECT id,title, overview,popularity,vote_average,release_date " +
-                            "FROM movie WHERE overview LIKE ?")
-                    .param('%' + prompt + '%').query(Movie.class).list();
-        }
-    }
+	@GetMapping("/search")
+	public List<Movie> searchMovies(
+			@RequestParam("prompt") String prompt,
+			@RequestParam(name = "rank", required = false) Integer rank,
+			@RequestParam(name = "category", required = false) String category) {
+
+		StringBuilder query = new StringBuilder(
+				"SELECT id, title, overview, vote_average FROM movie WHERE");
+
+		Map<String, Object> params = new HashMap<>();
+
+		if (rank != null) {
+			query.append(" vote_average >= :rank AND");
+			params.put("rank", rank);
+		}
+
+		if (category != null) {
+			query.append(" genres @> :category::jsonb AND");
+			params.put("category", "[{\"name\": \"" + category + "\"}]");
+		}
+
+		if (enableAiSearch) {
+			List<Double> promptEmbedding = aiClient.embed(prompt);
+
+			query.append(
+					" 1 - (overview_vector <=> :prompt_vector::vector) >= :similarity_threshold" +
+							" ORDER BY overview_vector <=> :prompt_vector::vector LIMIT :max_results");
+			params.put("prompt_vector", promptEmbedding.toString());
+			params.put("similarity_threshold", SIMILARITY_THRESHOLD);
+		} else {
+			query.append(" overview LIKE :prompt LIMIT :max_results");
+			params.put("prompt", '%' + prompt + '%');
+		}
+
+		params.put("max_results", MAX_RESULTS);
+
+		return jdbcClient.sql(query.toString())
+				.params(params)
+				.query(Movie.class).list();
+	}
 }

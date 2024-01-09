@@ -19,7 +19,7 @@
     <description>Spring Boot-based backend for the YugaPlus service</description>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
     </properties>
 
     <repositories>
@@ -60,16 +60,9 @@
             <scope>runtime</scope>
         </dependency>
 
-
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-pgvector-store-spring-boot-starter</artifactId>
             <version>0.8.0-SNAPSHOT</version>
         </dependency>
 
