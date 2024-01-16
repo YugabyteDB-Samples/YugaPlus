@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS movie;
+DROP TABLE IF EXISTS movie CASCADE;
 
 CREATE TABLE movie(
     id integer PRIMARY KEY,

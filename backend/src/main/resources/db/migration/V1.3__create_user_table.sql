@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS user_account;
+DROP TABLE IF EXISTS user_account CASCADE;
 
 CREATE TABLE user_account (
     id uuid PRIMARY KEY,
