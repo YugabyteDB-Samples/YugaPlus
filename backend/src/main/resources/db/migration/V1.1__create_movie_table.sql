@@ -1,12 +1,12 @@
 DROP TABLE IF EXISTS movie;
 
 CREATE TABLE movie(
+    id integer PRIMARY KEY,
     adult text,
     belongs_to_collection jsonb,
     budget integer,
     genres jsonb,
     homepage text,
-    id integer,
     imdb_id text,
     original_language text,
     original_title text,
