@@ -1,30 +1,79 @@
 package com.yugaplus.backend;
 
-import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-// import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-// import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-// import org.springframework.security.core.userdetails.UserDetailsService;
-// import org.springframework.security.provisioning.JdbcUserDetailsManager;
-// import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 
-// @Configuration
-// @EnableWebSecurity
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.PrintWriter;
+
+import javax.sql.DataSource;
+
+@Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    // @Bean
-    // public UserDetailsService userDetailsService(DataSource dataSource) {
-    // return new JdbcUserDetailsManager(dataSource);
-    // }
+    @Bean
+    UserDetailsManager users(DataSource dataSource) {
+        JdbcUserDetailsManager jdbcManager = new JdbcUserDetailsManager(dataSource);
 
-    // https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html
-    // SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    // http.authorizeHttpRequests(authz -> authz.requestMatchers("/**").permitAll())
-    // .csrf(crsf -> crsf.disable())
-    // .cors(cors -> cors.disable());
+        jdbcManager.setUsersByUsernameQuery(
+                "select email as username, password, true as enabled from user_account where email=?");
+        jdbcManager.setAuthoritiesByUsernameQuery(
+                "select email as username, 'USER' as authority from user_account where email=?");
 
-    // return http.build();
-    // }
+        return jdbcManager;
+    }
 
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests((authorizeRequests) -> authorizeRequests
+                .requestMatchers("/api/**").authenticated()
+                .anyRequest().permitAll())
+                .formLogin(formLogin -> formLogin
+                        .loginPage("/login")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .successHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+
+                            PrintWriter writer = response.getWriter();
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            writer.print("{\"success\": true, \"message\": \"Login successful\"}");
+                            writer.flush();
+                        })
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+                            PrintWriter writer = response.getWriter();
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            writer.print("{\"success\": false, \"message\": \"Login failed\"}");
+                            writer.flush();
+                        }))
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/"))
+                .cors(cors -> {
+                })
+                .csrf(crsf -> crsf.disable());
+
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }
