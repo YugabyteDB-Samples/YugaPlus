@@ -5,26 +5,23 @@ import LoginPage from './login';
 
 export default function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(
-        () => JSON.parse(localStorage.getItem('auth'))
-            ||
-            false);
+        () => JSON.parse(sessionStorage.getItem('auth')) || false);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
-        localStorage.setItem('auth', isAuthenticated);
-        console.log('useEffect: ' + isAuthenticated);
+        sessionStorage.setItem('auth', isAuthenticated);
     }, [isAuthenticated]);
 
     const setAuth = (auth) => {
-        console.log('setAuth: ' + auth);
         setIsAuthenticated(auth);
+        navigate('/');
     };
 
     return (
-        <Router>
-            <Routes>
-                <Route path="/" element={isAuthenticated ? <UserHome /> : <Navigate to="/login" replace />} />
-                <Route path="/login" element={<LoginPage setAuth={setAuth} />} />
-            </Routes>
-        </Router>
+        <Routes>
+            <Route path="/" element={isAuthenticated ? <UserHome /> : <Navigate to="/login" replace />} />
+            <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage setAuth={setAuth} />} />
+        </Routes>
     );
 }
