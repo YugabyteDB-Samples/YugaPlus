@@ -1,5 +1,5 @@
 import './userHome.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Select from "react-select";
 import LogOut from './logout';
 
@@ -18,6 +18,7 @@ const categoriesList = [
 export default function UserHome({ setAuth }) {
     const [selectedRank, changeRank] = React.useState(ranksList[4]);
     const [selectedCategory, changeCategory] = React.useState(categoriesList[0]);
+    const [user, setUser] = React.useState();
 
     const [userLibrary, setUserLibrary] = React.useState(
         [
@@ -34,11 +35,27 @@ export default function UserHome({ setAuth }) {
             { title: 'New Movie #3', overview: 'Overview of Movie #3.', rank: 9, releaseDate: '2024-03-01' },
         ]);
 
+    useEffect(() => {
+        fetch('/api/user/authenticated')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status.success) {
+                    setUser(data.user);
+                } else if (data.status.code === 401) {
+                    setAuth(false);
+                } else {
+                    // Handle error
+                    console.error(`Error: ${data.status.message}`);
+                }
+            })
+    }, []);
+
     return (
         <div className="app">
             <div className="app-main-container">
-                <div className="title-container">
+                <div className="header-container">
                     <div className="title">YugaPlus</div>
+                    <div className="user">{user?.fullName} ({user?.userLocation})</div>
                     <div className="logout">
                         <LogOut setAuth={setAuth} />
                     </div>
