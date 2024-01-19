@@ -15,13 +15,16 @@ export default function App() {
 
     const setAuth = (auth) => {
         setIsAuthenticated(auth);
-        navigate('/');
+        if (auth)
+            navigate('/');
+        else
+            navigate('/login');
     };
 
     return (
         <Routes>
-            <Route path="/" element={isAuthenticated ? <UserHome /> : <Navigate to="/login" replace />} />
+            <Route path="/" element={isAuthenticated ? <UserHome setAuth={setAuth} /> : <Navigate to="/login" replace />} />
             <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage setAuth={setAuth} />} />
-        </Routes>
+        </Routes >
     );
 }

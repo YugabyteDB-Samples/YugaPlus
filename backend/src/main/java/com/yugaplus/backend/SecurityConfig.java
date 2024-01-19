@@ -64,7 +64,18 @@ public class SecurityConfig {
                             writer.flush();
                         }))
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/"))
+                        .logoutUrl("/logout") // The URL that triggers logout
+                        .invalidateHttpSession(true) // Invalidates the HttpSession
+                        .deleteCookies("JSESSIONID") // Deletes the JSESSIONID cookie
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+
+                            PrintWriter writer = response.getWriter();
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            writer.print("{\"success\": true, \"message\": \"Logout successful\"}");
+                            writer.flush();
+                        }))
                 .cors(cors -> {
                 })
                 .csrf(crsf -> crsf.disable());

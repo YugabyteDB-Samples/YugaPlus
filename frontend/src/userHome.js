@@ -1,6 +1,7 @@
 import './userHome.css';
 import React from 'react';
 import Select from "react-select";
+import LogOut from './logout';
 
 const UserLibraryContext = React.createContext(null);
 const SearchAreaContext = React.createContext(null);
@@ -14,7 +15,7 @@ const categoriesList = [
     { label: 'Comedy', value: 'Comedy' }
 ];
 
-export default function UserHome() {
+export default function UserHome({ setAuth }) {
     const [selectedRank, changeRank] = React.useState(ranksList[4]);
     const [selectedCategory, changeCategory] = React.useState(categoriesList[0]);
 
@@ -38,6 +39,9 @@ export default function UserHome() {
             <div className="app-main-container">
                 <div className="title-container">
                     <div className="title">YugaPlus</div>
+                    <div className="logout">
+                        <LogOut setAuth={setAuth} />
+                    </div>
                 </div>
                 <div className="sections-container">
                     <UserLibraryContext.Provider value={{ userLibrary, setUserLibrary }}>
