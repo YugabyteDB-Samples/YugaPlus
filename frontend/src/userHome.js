@@ -66,7 +66,7 @@ export default function UserHome({ setAuth }) {
                     </UserLibraryContext.Provider>
 
                     <SearchAreaContext.Provider value={{ selectedRank, changeRank, selectedCategory, changeCategory, moviesRecommendations, setMoviesRecommendations }}>
-                        <SearchArea />
+                        <SearchArea setAuth={setAuth} />
                     </SearchAreaContext.Provider>
                 </div>
             </div>
@@ -75,8 +75,23 @@ export default function UserHome({ setAuth }) {
 };
 
 // User Library Component
-function UserLibrary() {
-    const { userLibrary } = React.useContext(UserLibraryContext);
+function UserLibrary({ setAuth }) {
+    const { userLibrary, setUserLibrary } = React.useContext(UserLibraryContext);
+
+    useEffect(() => {
+        fetch('/api/user/history')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status.success) {
+                    setUserLibrary(data.movies);
+                } else if (data.status.code === 401) {
+                    setAuth(false);
+                } else {
+                    // Handle error
+                    console.error(`Error: ${data.status.message}`);
+                }
+            })
+    }, []);
 
     return (
         <div className="user-library">
@@ -95,7 +110,7 @@ function UserLibrary() {
 };
 
 // Search Area Component with form
-function SearchArea() {
+function SearchArea({ setAuth }) {
     const { selectedRank, changeRank, selectedCategory, changeCategory, moviesRecommendations, setMoviesRecommendations } = React.useContext(SearchAreaContext);
 
     function searchForMovies(form) {
@@ -110,17 +125,17 @@ function SearchArea() {
 
         // setLoading(true);
 
-        fetch(url).
-            then((response) => {
-                if (!response.ok) {
-                    throw new Error(response.status + ' ' + response.statusText);
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status.success) {
+                    setMoviesRecommendations(data.movies);
+                } else if (data.status.code === 401) {
+                    setAuth(false);
                 } else {
-                    response.json().then(function (data) { setMoviesRecommendations(data); });
+                    // Handle error
+                    console.error(`Error: ${data.status.message}`);
                 }
-            }).catch((error) => {
-                alert('Oops, something went wrong: ' + error.message);
-            }).finally(() => {
-                // setLoading(false);
             });
     }
 

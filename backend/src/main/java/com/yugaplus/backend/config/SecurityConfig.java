@@ -1,4 +1,4 @@
-package com.yugaplus.backend;
+package com.yugaplus.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -6,7 +6,11 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -19,7 +23,14 @@ import com.yugaplus.backend.model.User;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -29,12 +40,37 @@ public class SecurityConfig {
 
     @Bean
     UserDetailsManager users(DataSource dataSource) {
-        JdbcUserDetailsManager jdbcManager = new JdbcUserDetailsManager(dataSource);
+        JdbcUserDetailsManager jdbcManager = new JdbcUserDetailsManager(dataSource) {
+            @Override
+            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+                try (Connection connection = dataSource.getConnection()) {
+                    PreparedStatement userStatement = connection.prepareStatement(
+                            "SELECT id, password FROM user_account WHERE email = ?");
+                    userStatement.setString(1, username);
 
-        jdbcManager.setUsersByUsernameQuery(
-                "select email as username, password, true as enabled from user_account where email=?");
-        jdbcManager.setAuthoritiesByUsernameQuery(
-                "select email as username, 'USER' as authority from user_account where email=?");
+                    ResultSet rs = userStatement.executeQuery();
+
+                    if (rs.next()) {
+                        List<GrantedAuthority> authorities = Collections
+                                .singletonList(new SimpleGrantedAuthority("USER"));
+
+                        return new UserRecord(
+                                username,
+                                rs.getString("password"),
+                                true,
+                                true,
+                                true,
+                                true,
+                                authorities,
+                                (UUID) rs.getObject("id"));
+                    } else {
+                        throw new UsernameNotFoundException("User not found");
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
 
         return jdbcManager;
     }
@@ -90,13 +126,13 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    public static Optional<String> getAuthenticatedUser() {
+    public static Optional<UserRecord> getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
             return Optional.empty();
         }
 
-        return Optional.of(authentication.getName());
+        return Optional.of((UserRecord) authentication.getPrincipal());
     }
 }

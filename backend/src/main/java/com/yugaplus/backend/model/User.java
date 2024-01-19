@@ -1,7 +1,9 @@
 package com.yugaplus.backend.model;
 
+import java.util.UUID;
+
 public class User {
-        private Integer id;
+        private UUID id;
         private String fullName;
         private String email;
         private String userLocation;
@@ -10,11 +12,11 @@ public class User {
         }
 
         // Getters and setters
-        public Integer getId() {
+        public UUID getId() {
                 return id;
         }
 
-        public void setId(Integer id) {
+        public void setId(UUID id) {
                 this.id = id;
         }
 
