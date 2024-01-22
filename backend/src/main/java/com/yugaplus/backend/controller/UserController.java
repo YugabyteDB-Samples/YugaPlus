@@ -42,15 +42,4 @@ public class UserController {
 
         return new UserResponse(new Status(true, HttpServletResponse.SC_OK), user);
     }
-
-    @GetMapping("/history")
-    public MovieResponse getUserHistory() {
-        UserRecord authUser = SecurityConfig.getAuthenticatedUser().get();
-
-        List<Movie> movies = jdbcClient.sql(
-                "SELECT title FROM movie WHERE id in (SELECT movie_id FROM user_history WHERE user_id = ?)")
-                .param(authUser.getUserId()).query(Movie.class).list();
-
-        return new MovieResponse(new Status(true, HttpServletResponse.SC_OK), movies);
-    }
 }

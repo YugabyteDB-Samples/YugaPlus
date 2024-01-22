@@ -20,20 +20,9 @@ export default function UserHome({ setAuth }) {
     const [selectedCategory, changeCategory] = React.useState(categoriesList[0]);
     const [user, setUser] = React.useState();
 
-    const [userLibrary, setUserLibrary] = React.useState(
-        [
-            { title: 'Movie #1', description: 'This is Movie 1 description.', releaseDate: '2023-01-01' },
-            { title: 'Movie #2', description: 'This is Movie 2 description.', releaseDate: '2023-02-01' },
-            { title: 'Movie #3', description: 'This is Movie 3 description.', releaseDate: '2023-03-01' },
-        ]
-    );
-
-    const [moviesRecommendations, setMoviesRecommendations] = React.useState(
-        [
-            { title: 'New Movie #1', overview: 'Overview of Movie #1.', rank: 8, releaseDate: '2024-01-01' },
-            { title: 'New Movie #2', overview: 'Overview of Movie #2.', rank: 7, releaseDate: '2024-02-01' },
-            { title: 'New Movie #3', overview: 'Overview of Movie #3.', rank: 9, releaseDate: '2024-03-01' },
-        ]);
+    const [userLibrary, setUserLibrary] = React.useState([]);
+    const [addedMoviesTable, setAddedMoviesTable] = React.useState([]);
+    const [moviesRecommendations, setMoviesRecommendations] = React.useState([]);
 
     useEffect(() => {
         fetch('/api/user/authenticated')
@@ -54,18 +43,29 @@ export default function UserHome({ setAuth }) {
         <div className="app">
             <div className="app-main-container">
                 <div className="header-container">
-                    <div className="title">YugaPlus</div>
+                    <div className="title">YugaPlus - Watch Your Favorite Movies Globally</div>
                     <div className="user">{user?.fullName} ({user?.userLocation})</div>
                     <div className="logout">
                         <LogOut setAuth={setAuth} />
                     </div>
                 </div>
                 <div className="sections-container">
-                    <UserLibraryContext.Provider value={{ userLibrary, setUserLibrary }}>
-                        <UserLibrary />
+                    <UserLibraryContext.Provider value={
+                        {
+                            userLibrary, setUserLibrary,
+                            addedMoviesTable, setAddedMoviesTable
+                        }}>
+                        <UserLibrary setAuth={setAuth} />
                     </UserLibraryContext.Provider>
 
-                    <SearchAreaContext.Provider value={{ selectedRank, changeRank, selectedCategory, changeCategory, moviesRecommendations, setMoviesRecommendations }}>
+                    <SearchAreaContext.Provider value={
+                        {
+                            selectedRank, changeRank,
+                            selectedCategory, changeCategory,
+                            moviesRecommendations, setMoviesRecommendations,
+                            userLibrary, setUserLibrary,
+                            addedMoviesTable, setAddedMoviesTable
+                        }}>
                         <SearchArea setAuth={setAuth} />
                     </SearchAreaContext.Provider>
                 </div>
@@ -76,14 +76,23 @@ export default function UserHome({ setAuth }) {
 
 // User Library Component
 function UserLibrary({ setAuth }) {
-    const { userLibrary, setUserLibrary } = React.useContext(UserLibraryContext);
+    const {
+        userLibrary, setUserLibrary,
+        addedMoviesTable, setAddedMoviesTable
+    } = React.useContext(UserLibraryContext);
 
     useEffect(() => {
-        fetch('/api/user/history')
+        fetch('/api/library/load')
             .then(response => response.json())
             .then(data => {
                 if (data.status.success) {
                     setUserLibrary(data.movies);
+
+                    const newAddedMoviesTable = {};
+                    for (let movie of data.movies) {
+                        newAddedMoviesTable[movie.id] = true;
+                    }
+                    setAddedMoviesTable(newAddedMoviesTable);
                 } else if (data.status.code === 401) {
                     setAuth(false);
                 } else {
@@ -92,6 +101,33 @@ function UserLibrary({ setAuth }) {
                 }
             })
     }, []);
+
+    function handleRemoveFromLibrary(movie) {
+        fetch(`/api/library/remove/${movie.id}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status.success) {
+                    // Remove the movie from userLibrary
+                    const updatedLibrary = userLibrary.filter(m => m.id !== movie.id);
+                    setUserLibrary(updatedLibrary);
+
+                    // Remove the movie from addedMoviesTable
+                    const newAddedMoviesTable = { ...addedMoviesTable };
+                    delete newAddedMoviesTable[movie.id];
+                    setAddedMoviesTable(newAddedMoviesTable);
+
+                    console.log('Movie removed from library!');
+                } else if (data.status.code === 401) {
+                    setAuth(false);
+                } else {
+                    // Handle error
+                    console.error(`Error: ${data.status.message}`);
+                }
+            })
+            .catch((error) => {
+                alert('Oops, something went wrong: ' + error.message);
+            });
+    }
 
     return (
         <div className="user-library">
@@ -102,6 +138,11 @@ function UserLibrary({ setAuth }) {
                         <h3>{movie.title}</h3>
                         <p>{movie.description}</p>
                         <p>{movie.releaseDate}</p>
+                        <button
+                            onClick={() => handleRemoveFromLibrary(movie)}
+                            hidden={!addedMoviesTable[movie.id]}>
+                            Remove from Library
+                        </button>
                     </li>
                 ))}
             </ul>
@@ -111,7 +152,13 @@ function UserLibrary({ setAuth }) {
 
 // Search Area Component with form
 function SearchArea({ setAuth }) {
-    const { selectedRank, changeRank, selectedCategory, changeCategory, moviesRecommendations, setMoviesRecommendations } = React.useContext(SearchAreaContext);
+    const {
+        selectedRank, changeRank,
+        selectedCategory, changeCategory,
+        moviesRecommendations, setMoviesRecommendations,
+        userLibrary, setUserLibrary,
+        addedMoviesTable, setAddedMoviesTable
+    } = React.useContext(SearchAreaContext);
 
     function searchForMovies(form) {
         const formData = new FormData(form);
@@ -122,8 +169,6 @@ function SearchArea({ setAuth }) {
         if (selectedCategory.value !== 'all') {
             url += '&category=' + encodeURIComponent(selectedCategory.value);
         }
-
-        // setLoading(true);
 
         fetch(url)
             .then(response => response.json())
@@ -136,7 +181,10 @@ function SearchArea({ setAuth }) {
                     // Handle error
                     console.error(`Error: ${data.status.message}`);
                 }
-            });
+            })
+            .catch((error) => {
+                alert('Oops, something went wrong: ' + error.message);
+            });;
     }
 
     function handleSubmit(event) {
@@ -149,6 +197,30 @@ function SearchArea({ setAuth }) {
             event.preventDefault();
             searchForMovies(event.target.form);
         }
+    }
+
+    function handleAddToLibrary(movie) {
+        fetch(`/api/library/add/${movie.id}`, { method: 'PUT' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status.success) {
+                    const updatedLibrary = [movie, ...userLibrary];
+                    setUserLibrary(updatedLibrary);
+
+                    const newAddedMoviesTable = { ...addedMoviesTable };
+                    newAddedMoviesTable[movie.id] = true;
+                    setAddedMoviesTable(newAddedMoviesTable);
+                    console.log('Movie added to library!');
+                } else if (data.status.code === 401) {
+                    setAuth(false);
+                } else {
+                    // Handle error
+                    console.error(`Error: ${data.status.message}`);
+                }
+            })
+            .catch((error) => {
+                alert('Oops, something went wrong: ' + error.message);
+            });
     }
 
     return (
@@ -181,8 +253,13 @@ function SearchArea({ setAuth }) {
                     <li key={index}>
                         <h3>{movie.title}</h3>
                         <p>{movie.overview}</p>
-                        <p>Rank: {movie.rank}</p>
+                        <p>Rank: {movie.voteAverage}</p>
                         <p>Release Date: {movie.releaseDate}</p>
+                        <button
+                            onClick={() => handleAddToLibrary(movie)}
+                            hidden={addedMoviesTable[movie.id]}>
+                            Add to Library
+                        </button>
                     </li>
                 ))}
             </ul>
