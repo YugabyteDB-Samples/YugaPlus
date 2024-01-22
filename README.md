@@ -51,6 +51,7 @@ A sample streaming service with your favorite movies and series. Built on Yugaby
     ```
 2. Start the app:
     ```shell
+    npm install
     npm start
     ```
 
@@ -68,10 +69,21 @@ Try a few prompts:
 
 ## Run in Docker
 
-INCOMPLETE: need to pass various parameters (as env variables) so that:
-
-* the backend can discover a Postgre/YugabyteDB container (and you can easily swithch between the databases by changing the parameters)
-* and the frontend can discover the backend
+Start the backend in Docker:
+1. Create a Docker image for the backend:
+    ```shell
+    cd backend
+    docker build -t yugaplus-backend .  
+    ```
+2. Start a backend container:
+    ```shell
+    docker run --name yugaplus-backend --net yugaplus-network -p 8080:8080 \
+        -e DB_URL=jdbc:postgresql://postgres:5432/postgres \
+        -e DB_USER=postgres \
+        -e DB_PASSWORD=password \
+        -e OPENAI_KEY=sk... \
+        yugaplus-backend
+    ```
 
 Start the frontend in Docker:
 1. Create a Docker image for the frontend:
@@ -81,18 +93,9 @@ Start the frontend in Docker:
     ```
 2. Start a frontend container:
     ```shell
-    docker run --name yugaplus-frontend -p 3000:3000 --net yugaplus-network yugaplus-frontend
-    ```
-
-Start the backend in Docker:
-1. Create a Docker image for the backend:
-    ```shell
-    cd backend
-    docker build -t yugaplus-backend .  
-    ```
-2. Start a backend container:
-    ```shell
-    docker run --name yugaplus-backend -p 8080:8080 --net yugaplus-network yugaplus-backend
+    docker run --name yugaplus-frontend --net yugaplus-network -p 3000:3000 \
+        -e REACT_APP_PROXY_URL=http://yugaplus-backend:8080 \
+        yugaplus-frontend
     ```
 
 ## Run With Docker Compose

@@ -11,7 +11,7 @@ function LoginPage({ setAuth }) {
         loginData.append('username', email);
         loginData.append('password', password);
 
-        fetch('/login', {
+        fetch('/api/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'

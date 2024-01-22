@@ -3,7 +3,7 @@ import React from 'react';
 function Logout({ setAuth }) {
 
     const handleLogout = async () => {
-        fetch('/logout', { method: 'POST' })
+        fetch('/api/logout', { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {

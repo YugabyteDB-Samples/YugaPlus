@@ -80,7 +80,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorizeRequests) -> authorizeRequests
                 .anyRequest().permitAll())
                 .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
+                        .loginPage("/api/login")
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .successHandler((request, response, authentication) -> {
@@ -102,7 +102,7 @@ public class SecurityConfig {
                             writer.flush();
                         }))
                 .logout(logout -> logout
-                        .logoutUrl("/logout") // The URL that triggers logout
+                        .logoutUrl("/api/logout") // The URL that triggers logout
                         .invalidateHttpSession(true) // Invalidates the HttpSession
                         .deleteCookies("JSESSIONID") // Deletes the JSESSIONID cookie
                         .logoutSuccessHandler((request, response, authentication) -> {
