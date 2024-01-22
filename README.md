@@ -65,3 +65,36 @@ Sign in using the following credentials:
 Try a few prompts:
 *A movie about a space adventure.*
 *A kids-friendly movie with unexpected ending.*
+
+## Run in Docker
+
+INCOMPLETE: need to pass various parameters (as env variables) so that:
+
+* the backend can discover a Postgre/YugabyteDB container (and you can easily swithch between the databases by changing the parameters)
+* and the frontend can discover the backend
+
+Start the frontend in Docker:
+1. Create a Docker image for the frontend:
+    ```shell
+    cd frontend
+    docker build -t yugaplus-frontend .  
+    ```
+2. Start a frontend container:
+    ```shell
+    docker run --name yugaplus-frontend -p 3000:3000 yugaplus-frontend
+    ```
+
+Start the backend in Docker:
+1. Create a Docker image for the backend:
+    ```shell
+    cd backend
+    docker build -t yugaplus-backend .  
+    ```
+2. Start a backend container:
+    ```shell
+    docker run --name yugaplus-backend -p 8080:8080 yugaplus-backend
+    ```
+
+## Run With Docker Compose
+
+TBD

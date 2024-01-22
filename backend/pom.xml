@@ -7,13 +7,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.1-SNAPSHOT</version>
+        <version>3.2.1</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
     <groupId>com.yugaplus</groupId>
     <artifactId>yugaplus-backend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>yugaplus-backend</name>
 
     <description>Spring Boot-based backend for the YugaPlus service</description>
