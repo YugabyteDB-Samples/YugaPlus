@@ -81,7 +81,7 @@ Start the frontend in Docker:
     ```
 2. Start a frontend container:
     ```shell
-    docker run --name yugaplus-frontend -p 3000:3000 yugaplus-frontend
+    docker run --name yugaplus-frontend -p 3000:3000 --net yugaplus-network yugaplus-frontend
     ```
 
 Start the backend in Docker:
@@ -92,7 +92,7 @@ Start the backend in Docker:
     ```
 2. Start a backend container:
     ```shell
-    docker run --name yugaplus-backend -p 8080:8080 yugaplus-backend
+    docker run --name yugaplus-backend -p 8080:8080 --net yugaplus-network yugaplus-backend
     ```
 
 ## Run With Docker Compose
