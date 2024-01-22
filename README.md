@@ -56,10 +56,12 @@ A sample streaming service with your favorite movies and series. Built on Yugaby
 
 ## Test the App
 
-```shell
-http GET :8080/api/movie/search prompt=='A movie about a space adventure.'
+Sign in using the following credentials:
 
-http GET :8080/api/movie/search rank==7 prompt=='A movie about a space adventure.'
+* `user1@gmail.com/password` - already has some movies in the library
+* `user2@gmail.com/password` - the library is empty
+ 
 
-http GET :8080/api/movie/search rank==7 category=='Science Fiction' prompt=='A movie about a space adventure.'
-```
+Try a few prompts:
+*A movie about a space adventure.*
+*A kids-friendly movie with unexpected ending.*

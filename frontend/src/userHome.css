@@ -28,10 +28,24 @@
     padding-left: 1rem;
 }
 
+.title-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
 .title {
     color: #FFFFFF;
     flex: 1;
     font-size: 2rem;
+    padding-bottom: 1rem;
+    text-align: left;
+}
+
+.subtitle {
+    color: #FFFFFF;
+    flex: 1;
+    font-size: 1rem;
     padding-bottom: 1rem;
     text-align: left;
 }

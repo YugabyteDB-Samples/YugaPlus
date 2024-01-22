@@ -6,13 +6,28 @@ import LogOut from './logout';
 const UserLibraryContext = React.createContext(null);
 const SearchAreaContext = React.createContext(null);
 
-// Dropdown options for rank and category
 const ranksList = Array.from({ length: 10 }, (_, i) => ({ label: i + 1, value: i + 1 }));
 const categoriesList = [
     { label: 'All Categories', value: 'all' },
-    { label: 'Science Fiction', value: 'Science Fiction' },
     { label: 'Action', value: 'Action' },
-    { label: 'Comedy', value: 'Comedy' }
+    { label: 'Adventure', value: 'Adventure' },
+    { label: 'Animation', value: 'Animation' },
+    { label: 'Comedy', value: 'Comedy' },
+    { label: 'Crime', value: 'Crime' },
+    { label: 'Documentary', value: 'Documentary' },
+    { label: 'Drama', value: 'Drama' },
+    { label: 'Family', value: 'Family' },
+    { label: 'Fantasy', value: 'Fantasy' },
+    { label: 'History', value: 'History' },
+    { label: 'Horror', value: 'Horror' },
+    { label: 'Music', value: 'Music' },
+    { label: 'Mystery', value: 'Mystery' },
+    { label: 'Romance', value: 'Romance' },
+    { label: 'Science Fiction', value: 'Science Fiction' },
+    { label: 'Thriller', value: 'Thriller' },
+    { label: 'TV Movie', value: 'TV Movie' },
+    { label: 'War', value: 'War' },
+    { label: 'Western', value: 'Western' }
 ];
 
 export default function UserHome({ setAuth }) {
@@ -43,7 +58,10 @@ export default function UserHome({ setAuth }) {
         <div className="app">
             <div className="app-main-container">
                 <div className="header-container">
-                    <div className="title">YugaPlus - Watch Your Favorite Movies Globally</div>
+                    <div className="title-container">
+                        <div className="title">YugaPlus</div>
+                        <div className="subtitle">Watch Your Favorite Movies Globally</div>
+                    </div>
                     <div className="user">{user?.fullName} ({user?.userLocation})</div>
                     <div className="logout">
                         <LogOut setAuth={setAuth} />
