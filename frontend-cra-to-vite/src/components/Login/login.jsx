@@ -56,7 +56,7 @@ function LoginPage() {
           required
         />
         <div className="login-button-container">
-          <button type="submit">Login</button>
+          <button type="submit">Sign in</button>
         </div>
       </form>
     </div>
