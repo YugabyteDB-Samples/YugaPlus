@@ -1,6 +1,5 @@
 package com.yugaplus.backend.controller;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yugaplus.backend.api.MovieResponse;
 import com.yugaplus.backend.api.Status;
 import com.yugaplus.backend.api.UserLibraryResponse;
 import com.yugaplus.backend.config.SecurityConfig;
@@ -36,7 +34,7 @@ public class UserLibraryController {
 
         List<Movie> movies = jdbcClient.sql("""
                 SELECT id, title, vote_average, release_date
-                FROM movie JOIN user_history ON movie.id = user_history.movie_id
+                FROM movie JOIN user_library ON movie.id = user_library.movie_id
                 WHERE user_id = ?
                 ORDER BY added_time DESC
                 """).param(authUser.getUserId()).query(Movie.class).list();
@@ -50,7 +48,7 @@ public class UserLibraryController {
 
         try {
             jdbcClient.sql("""
-                    INSERT INTO user_history (user_id, movie_id) VALUES (?, ?)
+                    INSERT INTO user_library (user_id, movie_id) VALUES (?, ?)
                     """).params(authUser.getUserId(), movieId).update();
             return new UserLibraryResponse(new Status(true, HttpServletResponse.SC_OK), null);
         } catch (Exception e) {
@@ -64,7 +62,7 @@ public class UserLibraryController {
 
         try {
             jdbcClient.sql("""
-                    DELETE FROM user_history WHERE user_id = ? AND movie_id = ?
+                    DELETE FROM user_library WHERE user_id = ? AND movie_id = ?
                     """).params(authUser.getUserId(), movieId).update();
             return new UserLibraryResponse(new Status(true, HttpServletResponse.SC_OK), null);
         } catch (Exception e) {

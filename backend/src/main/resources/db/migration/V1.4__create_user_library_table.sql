@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS user_history;
+DROP TABLE IF EXISTS user_library;
 
-CREATE TABLE user_history(
+CREATE TABLE user_library(
     user_id uuid NOT NULL,
     movie_id integer NOT NULL,
     start_watch_time int NOT NULL DEFAULT 0,
@@ -19,7 +19,7 @@ WITH user_data AS (
         user_account
     WHERE
         email = 'user1@gmail.com')
-INSERT INTO user_history(user_id, movie_id, start_watch_time, added_time)
+INSERT INTO user_library(user_id, movie_id, start_watch_time, added_time)
 SELECT
     (
         SELECT

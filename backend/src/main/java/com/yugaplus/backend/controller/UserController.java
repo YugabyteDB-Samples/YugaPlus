@@ -2,17 +2,13 @@ package com.yugaplus.backend.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yugaplus.backend.api.MovieResponse;
 import com.yugaplus.backend.api.Status;
 import com.yugaplus.backend.api.UserResponse;
 import com.yugaplus.backend.config.SecurityConfig;
 import com.yugaplus.backend.config.UserRecord;
-import com.yugaplus.backend.model.Movie;
 import com.yugaplus.backend.model.User;
 
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.JdbcClient;
