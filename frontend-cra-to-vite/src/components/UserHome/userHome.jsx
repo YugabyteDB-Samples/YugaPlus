@@ -1,7 +1,4 @@
-import "./userHome.scss";
 import React, { useEffect } from "react";
-// import Select from "react-select";
-
 import { UserLibraryProvider } from "../../contexts/userLibraryProvider";
 import { SearchProvider } from "../../contexts/searchProvider";
 import { UserLibrary } from "../UserLibrary/UserLibrary";
