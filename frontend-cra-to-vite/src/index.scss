@@ -2,11 +2,6 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -53,30 +48,6 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
-// .movie-title-container {
-//   display: flex;
-//   flex-direction: row;
-//   justify-content: space-between;
-//   flex-grow: 0;
-
-//   button {
-//     align-self: center;
-//   }
-// }
 
 .delete-button, .logout-button, .search-button {
   padding: 5px 10px;
@@ -132,13 +103,6 @@ button:focus-visible {
     .brand-title-container {
       display: flex;
       flex-direction: column;
-      .title {
-  
-      }
-  
-      .subtitle {
-  
-      }
     }
   }
   
@@ -316,6 +280,30 @@ button:focus-visible {
       border: 1px solid #ccc;
       height: 20px;
     }
+
+    .password-container {
+      width: 68%;
+      position: relative;
+      height: 60px;
+      input {
+        padding-right: 35px;
+        width: 83%;
+      }
+
+      button {
+        all: unset;
+        position: absolute;
+        right: 15px;
+        vertical-align: middle;
+        top: 25px;
+
+  
+        .eye-svg {
+          cursor: pointer;
+        }
+      }
+    }
+
   }
 
   .login-button-container {

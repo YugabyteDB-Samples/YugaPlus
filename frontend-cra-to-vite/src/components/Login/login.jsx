@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/authProvider";
 import { useNavigate } from "react-router-dom";
+import EyeSVG from "../SVG/eye";
 function LoginPage() {
   const navigate = useNavigate();
   const { setAuth } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("user1@gmail.com");
+  const [password, setPassword] = useState("MyYugaPlusPassowrd");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -25,7 +27,6 @@ function LoginPage() {
       .then((data) => {
         if (data.success) {
           console.log("Login successful!");
-          debugger;
           setAuth(true, navigate);
         } else {
           alert("Login failed: " + data.message);
@@ -48,13 +49,23 @@ function LoginPage() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div className="password-container">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setShowPassword(!showPassword);
+            }}
+          >
+            <EyeSVG className="eye-svg" />
+          </button>
+        </div>
         <div className="login-button-container">
           <button type="submit">Sign in</button>
         </div>
