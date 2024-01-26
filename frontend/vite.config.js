@@ -9,8 +9,8 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/api": {
-        target: "http://yugaplus-backend:8080", // Targets backend docker container
-        // target: "http://localhost:8080", // Targets backend running locally
+        // target: "http://yugaplus-backend:8080", // Targets backend docker container
+        target: "http://localhost:8080", // Targets backend running locally
         changeOrigin: true,
       },
     },

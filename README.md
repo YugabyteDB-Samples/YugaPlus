@@ -98,7 +98,7 @@ Start the backend in Docker:
         -e DB_URL=jdbc:postgresql://postgres:5432/postgres \
         -e DB_USER=postgres \
         -e DB_PASSWORD=password \
-        -e OPENAI_KEY=sk... \
+        -e OPENAI_API_KEY=sk... \
         yugaplus-backend
     ```
 
