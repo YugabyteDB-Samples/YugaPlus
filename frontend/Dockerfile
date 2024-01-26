@@ -7,12 +7,12 @@ WORKDIR /app
 COPY public ./public
 COPY src ./src
 COPY package.json .
+COPY package-lock.json .
+COPY vite.config.js .
+COPY index.html .
 
 # Install any needed packages specified in package.json
 RUN npm install
-
-# Define environment variable
-ENV NODE_ENV=production
 
 # Expose port 3000
 EXPOSE 3000
