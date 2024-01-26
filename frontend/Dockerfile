@@ -14,6 +14,9 @@ COPY index.html .
 # Install any needed packages specified in package.json
 RUN npm install
 
+# Set environment
+ENV REACT_APP_RUNTIME_ENVIRONMENT=docker
+
 # Expose port 3000
 EXPOSE 3000
 
