@@ -8,6 +8,8 @@ COPY public ./public
 COPY src ./src
 COPY package.json .
 COPY package-lock.json .
+COPY vite.config.js .
+COPY index.html .
 
 # Install any needed packages specified in package.json
 RUN npm install

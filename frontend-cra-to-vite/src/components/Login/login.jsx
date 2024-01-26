@@ -6,7 +6,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const { setAuth } = useAuth();
   const [email, setEmail] = useState("user1@gmail.com");
-  const [password, setPassword] = useState("MyYugaPlusPassowrd");
+  const [password, setPassword] = useState("MyYugaPlusPassword");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (event) => {
