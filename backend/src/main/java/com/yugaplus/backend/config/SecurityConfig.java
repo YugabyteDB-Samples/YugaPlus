@@ -17,9 +17,6 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.yugaplus.backend.api.Status;
-import com.yugaplus.backend.model.User;
-
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.PrintWriter;
