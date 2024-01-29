@@ -22,8 +22,8 @@ public class UserInterceptor implements HandlerInterceptor {
         if (!user.isEmpty())
             return true;
 
-        if (request.getParameter("API_KEY") != null) {
-            String apiKey = request.getParameter("API_KEY");
+        if (request.getParameter("api_key") != null) {
+            String apiKey = request.getParameter("api_key");
 
             if (apiKey.equals("gpt-store-plugin"))
                 return true;
