@@ -147,3 +147,9 @@ docker run -d --name yugabytedb-node3 --net yugaplus-network \
   yugabytedb/yugabyte:latest \
   bin/yugabyted start --join=yugabytedb-node1 --base_dir=/home/yugabyte/yb_data --daemon=false
 ```
+
+## GPT Store Plugin
+
+```shell
+http GET :8080/api/movie/search prompt=='space' API_KEY=='gpt-store-plugin'
+```

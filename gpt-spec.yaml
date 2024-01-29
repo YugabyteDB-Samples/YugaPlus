@@ -1,0 +1,87 @@
+openapi: 3.1.0
+info:
+  title: Movies recommendations
+  description: This is an API endpoint for the movie recommendations service.
+  version: "1.0.0"
+servers:
+  - url: "https://example.com"
+    description: Development server
+paths:
+  /api/movie/search:
+    get:
+      operationId: getMovies
+      summary: Get the list of movies recommendations
+      parameters:
+        - name: prompt
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: API_KEY
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getMoviesResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getMoviesResponse"
+components:
+  schemas:
+    Movie:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The movie title.
+        overview:
+          type: string
+          description: The movie overview.
+        releaseDate:
+          type: string
+          description: The movie release date.
+        popularity:
+          type: number
+          description: The movie rating.
+        voteAverage:
+          type: number
+          description: The movie vote average.
+        voteCount:
+          type: integer
+          description: The movie vote count.
+        genres:
+          type: array
+          items:
+            type: string
+          description: The list of genres.
+    getMoviesResponse:
+      type: object
+      properties:
+        status:
+          type: object
+          description: The status object.
+          properties:
+            success:
+              type: boolean
+              description: The success flag.
+            code:
+              type: integer
+              description: The status code.
+            message:
+              type: string
+              description: The status message.
+        movies:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/Movie"
+          description: The list of movies.
