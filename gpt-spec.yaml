@@ -4,7 +4,7 @@ info:
   description: This is an API endpoint for the movie recommendations service.
   version: "1.0.0"
 servers:
-  - url: "https://example.com"
+  - url: "https://ai.dmagda.com"
     description: Development server
 paths:
   /api/movie/search:
@@ -13,11 +13,6 @@ paths:
       summary: Get the list of movies recommendations
       parameters:
         - name: prompt
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: API_KEY
           in: query
           required: true
           schema:

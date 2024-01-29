@@ -151,5 +151,5 @@ docker run -d --name yugabytedb-node3 --net yugaplus-network \
 ## GPT Store Plugin
 
 ```shell
-http GET :8080/api/movie/search prompt=='space' API_KEY=='gpt-store-plugin'
+http GET http://ai.dmagda.com:8080/api/movie/search X-Api-Key:gpt-store-plugin prompt=='space'
 ```
