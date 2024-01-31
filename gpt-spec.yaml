@@ -1,35 +1,73 @@
-openapi: 3.1.0
+openapi: 3.0.0
 info:
-  title: Movies recommendations
-  description: This is an API endpoint for the movie recommendations service.
-  version: "1.0.0"
+  title: Movie Search API
+  description: API for searching movies.
+  version: 1.0.0
 servers:
-  - url: "https://ai.dmagda.com"
-    description: Development server
+  - url: https://ai.dmagda.com
+    description: Movie Search API server
 paths:
   /api/movie/search:
     get:
-      operationId: getMovies
-      summary: Get the list of movies recommendations
+      operationId: searchMovies
+      summary: Search for movies
+      description: Retrieves a list of movies based on the search criteria.
       parameters:
-        - name: prompt
-          in: query
+        - in: query
+          name: prompt
           required: true
+          description: The search prompt to query movies.
           schema:
             type: string
+        - in: query
+          name: rank
+          required: false
+          description: The rank of the movie to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+        - in: query
+          name: category
+          required: false
+          description: The genre of the movie to return.
+          schema:
+            type: string
+            enum:
+              - Action
+              - Adventure
+              - Animation
+              - Comedy
+              - Crime
+              - Documentary
+              - Drama
+              - Family
+              - Fantasy
+              - History
+              - Horror
+              - Music
+              - Mystery
+              - Romance
+              - Science Fiction
+              - TV Movie
+              - Thriller
+              - War
+              - Western
       responses:
         "200":
-          description: OK
+          description: Successful response with a list of movies
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/getMoviesResponse"
         "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/getMoviesResponse"
+          description: Unauthorized request
+        "400":
+          description: Bad request
+        "404":
+          description: Not found
+        "500":
+          description: Server error
 components:
   schemas:
     Movie:
@@ -63,7 +101,6 @@ components:
       properties:
         status:
           type: object
-          description: The status object.
           properties:
             success:
               type: boolean
@@ -77,6 +114,5 @@ components:
         movies:
           type: array
           items:
-            type: object
             $ref: "#/components/schemas/Movie"
           description: The list of movies.

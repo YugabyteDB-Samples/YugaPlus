@@ -15,6 +15,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class UserInterceptor implements HandlerInterceptor {
+
+    private String apiKey;
+
+    public UserInterceptor(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         Optional<UserRecord> user = SecurityConfig.getAuthenticatedUser();
@@ -22,11 +29,8 @@ public class UserInterceptor implements HandlerInterceptor {
         if (!user.isEmpty())
             return true;
 
-        if (request.getHeader("X-Api-Key") != null) {
-            String apiKey = request.getHeader("X-Api-Key");
-
-            if (apiKey.equals("gpt-store-plugin"))
-                return true;
+        if (request.getHeader("X-Api-Key") != null && request.getHeader("X-Api-Key").equals(apiKey)) {
+            return true;
         }
 
         UserResponse userResponse = new UserResponse(new Status(false, HttpServletResponse.SC_UNAUTHORIZED), null);
