@@ -1,6 +1,6 @@
-# YugaPlus: Movies Recommendations Service With OpenAI, Spring AI and PostgreSQL pgvector
+# YugaPlus: Movie Recommendation Service with OpenAI, Spring AI, and PostgreSQL pgvector
 
-This is a sample movies recommendations service that is built on an OpenAI embedding model, Spring AI framework and PostgreSQL pgvector.
+This is a sample movie recommendation service that is built on an OpenAI embedding model, Spring AI framework and PostgreSQL pgvector.
 
 The service takes user questions written in plain English and uses a gen AI stack (OpenAI, Spring AI and PostgreSQL pgvector) to provide the user with the most relevant movies recommendations.
 
