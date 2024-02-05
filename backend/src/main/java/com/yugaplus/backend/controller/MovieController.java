@@ -24,85 +24,90 @@ import org.springframework.ai.embedding.EmbeddingClient;
 @RestController
 @RequestMapping("/api/movie")
 public class MovieController {
-	private static final Number SIMILARITY_THRESHOLD = 0.7;
-	private static final Integer MAX_RESULTS = 3;
+    private static final Number SIMILARITY_THRESHOLD = 0.7;
+    private static final Integer MAX_RESULTS = 3;
 
-	private JdbcClient jdbcClient;
+    private JdbcClient jdbcClient;
 
-	private EmbeddingClient aiClient;
+    private EmbeddingClient aiClient;
 
-	private boolean enableAiSearch;
+    private boolean enableAiSearch;
 
-	public MovieController(
-			@Value("${spring.ai.openai.api-key:#{null}}") String openAiApiKey,
-			@Autowired(required = false) EmbeddingClient aiClient,
-			JdbcClient jdbcClient) {
+    public MovieController(
+            @Value("${spring.ai.openai.api-key:#{null}}") String openAiApiKey,
+            @Autowired(required = false) EmbeddingClient aiClient,
+            JdbcClient jdbcClient) {
 
-		enableAiSearch = openAiApiKey != null && !openAiApiKey.isBlank()
-				&& !openAiApiKey.equals("your-api-key");
+        enableAiSearch = openAiApiKey != null && !openAiApiKey.isBlank()
+                && !openAiApiKey.equals("your-api-key");
 
-		this.aiClient = aiClient;
-		this.jdbcClient = jdbcClient;
-	}
+        this.aiClient = aiClient;
+        this.jdbcClient = jdbcClient;
+    }
 
-	@GetMapping("/{id}")
-	public MovieResponse getMovieById(@PathVariable Integer id) {
-		Movie movie = jdbcClient.sql(
-				"SELECT * FROM movie WHERE id = ?")
-				.param(id).query(Movie.class).single();
+    @GetMapping("/{id}")
+    public MovieResponse getMovieById(@PathVariable Integer id) {
+        long startTime = System.currentTimeMillis();
 
-		return new MovieResponse(new Status(true, HttpServletResponse.SC_OK), List.of(movie));
-	}
+        Movie movie = jdbcClient.sql(
+                "SELECT * FROM movie WHERE id = ?")
+                .param(id).query(Movie.class).single();
 
-	@GetMapping("/search")
-	public MovieResponse searchMovies(
-			@RequestParam("prompt") String prompt,
-			@RequestParam(name = "rank", required = false) Integer rank,
-			@RequestParam(name = "category", required = false) String category) {
+        long execTime = System.currentTimeMillis() - startTime;
 
-		StringBuilder query = new StringBuilder(
-				"SELECT id, title, overview, vote_average, release_date FROM movie WHERE");
+        return new MovieResponse(new Status(true, HttpServletResponse.SC_OK, 
+                formatDatabaseLatency(execTime)), List.of(movie));
+    }
 
-		Map<String, Object> params = new HashMap<>();
+    @GetMapping("/search")
+    public MovieResponse searchMovies(
+            @RequestParam("prompt") String prompt,
+            @RequestParam(name = "rank", required = false) Integer rank,
+            @RequestParam(name = "category", required = false) String category) {
 
-		if (rank != null) {
-			query.append(" vote_average >= :rank AND");
-			params.put("rank", rank);
-		}
+        StringBuilder query = new StringBuilder(
+                "SELECT id, title, overview, vote_average, release_date FROM movie WHERE");
 
-		if (category != null) {
-			query.append(" genres @> :category::jsonb AND");
-			params.put("category", "[{\"name\": \"" + category + "\"}]");
-		}
+        Map<String, Object> params = new HashMap<>();
 
-		if (enableAiSearch) {
-			List<Double> promptEmbedding = aiClient.embed(prompt);
+        if (rank != null) {
+            query.append(" vote_average >= :rank AND");
+            params.put("rank", rank);
+        }
 
-			query.append(
-					" 1 - (overview_vector <=> :prompt_vector::vector) >= :similarity_threshold" +
-							" ORDER BY overview_vector <=> :prompt_vector::vector LIMIT :max_results");
-			params.put("prompt_vector", promptEmbedding.toString());
-			params.put("similarity_threshold", SIMILARITY_THRESHOLD);
-		} else {
-			query.append(" overview LIKE :prompt LIMIT :max_results");
-			params.put("prompt", '%' + prompt + '%');
-		}
+        if (category != null) {
+            query.append(" genres @> :category::jsonb AND");
+            params.put("category", "[{\"name\": \"" + category + "\"}]");
+        }
 
-		params.put("max_results", MAX_RESULTS);
+        if (enableAiSearch) {
+            List<Double> promptEmbedding = aiClient.embed(prompt);
 
-		long startTime = System.currentTimeMillis();
+            query.append(
+                    " 1 - (overview_vector <=> :prompt_vector::vector) >= :similarity_threshold" +
+                            " ORDER BY overview_vector <=> :prompt_vector::vector LIMIT :max_results");
+            params.put("prompt_vector", promptEmbedding.toString());
+            params.put("similarity_threshold", SIMILARITY_THRESHOLD);
+        } else {
+            query.append(" overview LIKE :prompt LIMIT :max_results");
+            params.put("prompt", '%' + prompt + '%');
+        }
 
-		List<Movie> movies = jdbcClient.sql(query.toString())
-				.params(params)
-				.query(Movie.class).list();
+        params.put("max_results", MAX_RESULTS);
 
-		long execTime = System.currentTimeMillis() - startTime;
+        long startTime = System.currentTimeMillis();
 
-		return new MovieResponse(new Status(true, HttpServletResponse.SC_OK, formatDatabaseLatency(execTime)), movies);
-	}
+        List<Movie> movies = jdbcClient.sql(query.toString())
+                .params(params)
+                .query(Movie.class).list();
 
-	static String formatDatabaseLatency(long execTime) {
-		return String.format("%.3f seconds", (float) execTime / 1000);
-	}
+        long execTime = System.currentTimeMillis() - startTime;
+
+        return new MovieResponse(new Status(true, HttpServletResponse.SC_OK, formatDatabaseLatency(execTime)), movies);
+    }
+
+    static String formatDatabaseLatency(long execTime) {
+        return String.format("latency is %.3f seconds", (float) execTime / 1000);
+    }
 
 }

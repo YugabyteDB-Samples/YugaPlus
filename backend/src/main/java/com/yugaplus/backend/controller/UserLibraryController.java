@@ -77,6 +77,6 @@ public class UserLibraryController {
     }
 
     static String formatDatabaseLatency(long execTime) {
-        return String.format("%.3f seconds", (float) execTime / 1000);
+        return String.format("latency is %.3f seconds", (float) execTime / 1000);
     }
 }
