@@ -16,7 +16,6 @@ public class Status {
         this.code = statusCode;
     }
 
-    
     public Status(boolean success, int statusCode, String message) {
         this.success = success;
         this.code = statusCode;
@@ -41,5 +40,9 @@ public class Status {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }
