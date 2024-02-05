@@ -27,3 +27,6 @@ CREATE TABLE movie(
     vote_average numeric,
     vote_count integer
 );
+
+CREATE INDEX idx_vote_average ON movie(vote_average);
+
