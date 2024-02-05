@@ -47,10 +47,16 @@ public class UserLibraryController {
         UserRecord authUser = SecurityConfig.getAuthenticatedUser().get();
 
         try {
+            long startTime = System.currentTimeMillis();
+
             jdbcClient.sql("""
                     INSERT INTO user_library (user_id, movie_id) VALUES (?, ?)
                     """).params(authUser.getUserId(), movieId).update();
-            return new UserLibraryResponse(new Status(true, HttpServletResponse.SC_OK), null);
+
+            long execTime = System.currentTimeMillis() - startTime;
+
+            return new UserLibraryResponse(new Status(true, HttpServletResponse.SC_OK,
+                    formatDatabaseLatency(execTime)), null);
         } catch (Exception e) {
             return new UserLibraryResponse(new Status(false, HttpServletResponse.SC_INTERNAL_SERVER_ERROR), null);
         }
@@ -68,5 +74,9 @@ public class UserLibraryController {
         } catch (Exception e) {
             return new UserLibraryResponse(new Status(true, HttpServletResponse.SC_INTERNAL_SERVER_ERROR), null);
         }
+    }
+
+    static String formatDatabaseLatency(long execTime) {
+        return String.format("%.3f seconds", (float) execTime / 1000);
     }
 }

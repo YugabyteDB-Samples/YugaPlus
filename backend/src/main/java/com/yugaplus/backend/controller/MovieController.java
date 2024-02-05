@@ -90,10 +90,19 @@ public class MovieController {
 
 		params.put("max_results", MAX_RESULTS);
 
+		long startTime = System.currentTimeMillis();
+
 		List<Movie> movies = jdbcClient.sql(query.toString())
 				.params(params)
 				.query(Movie.class).list();
 
-		return new MovieResponse(new Status(true, HttpServletResponse.SC_OK), movies);
+		long execTime = System.currentTimeMillis() - startTime;
+
+		return new MovieResponse(new Status(true, HttpServletResponse.SC_OK, formatDatabaseLatency(execTime)), movies);
 	}
+
+	static String formatDatabaseLatency(long execTime) {
+		return String.format("%.3f seconds", (float) execTime / 1000);
+	}
+
 }
