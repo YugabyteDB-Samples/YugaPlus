@@ -48,10 +48,11 @@ public class UserLibraryController {
 
         try {
             jdbcClient.sql("""
-                    INSERT INTO user_library (user_id, movie_id) VALUES (?, ?)
-                    """).params(authUser.getUserId(), movieId).update();
+                    INSERT INTO user_library (user_id, movie_id, user_location) VALUES (?, ?, ?)
+                    """).params(authUser.getUserId(), movieId, authUser.getUserLocation()).update();
             return new UserLibraryResponse(new Status(true, HttpServletResponse.SC_OK), null);
         } catch (Exception e) {
+            e.printStackTrace();
             return new UserLibraryResponse(new Status(false, HttpServletResponse.SC_INTERNAL_SERVER_ERROR), null);
         }
     }
@@ -62,10 +63,11 @@ public class UserLibraryController {
 
         try {
             jdbcClient.sql("""
-                    DELETE FROM user_library WHERE user_id = ? AND movie_id = ?
-                    """).params(authUser.getUserId(), movieId).update();
+                    DELETE FROM user_library WHERE user_id = ? AND movie_id = ? AND user_location = ?
+                    """).params(authUser.getUserId(), movieId, authUser.getUserLocation()).update();
             return new UserLibraryResponse(new Status(true, HttpServletResponse.SC_OK), null);
         } catch (Exception e) {
+            e.printStackTrace();
             return new UserLibraryResponse(new Status(true, HttpServletResponse.SC_INTERNAL_SERVER_ERROR), null);
         }
     }

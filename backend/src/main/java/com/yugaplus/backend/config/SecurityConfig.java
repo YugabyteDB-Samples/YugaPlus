@@ -42,7 +42,7 @@ public class SecurityConfig {
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
                 try (Connection connection = dataSource.getConnection()) {
                     PreparedStatement userStatement = connection.prepareStatement(
-                            "SELECT id, password FROM user_account WHERE email = ?");
+                            "SELECT id, password, user_location FROM user_account WHERE email = ?");
                     userStatement.setString(1, username);
 
                     ResultSet rs = userStatement.executeQuery();
@@ -54,6 +54,7 @@ public class SecurityConfig {
                         return new UserRecord(
                                 username,
                                 rs.getString("password"),
+                                rs.getString("user_location"),
                                 true,
                                 true,
                                 true,
