@@ -1,0 +1,31 @@
+version: '3.9'
+services:
+  yugaplus-backend:
+    image: yugaplus-backend:latest
+    build: ./backend
+    networks:
+      - yugaplus-network
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_URL=jdbc:postgresql://postgres:5432/postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - DB_CONN_INIT_SQL=
+      - OPENAI_API_KEY=your-api-key
+
+  yugaplus-frontend:
+    image: yugaplus-frontend:latest
+    build: ./frontend
+    depends_on:
+      - yugaplus-backend
+    networks:
+      - yugaplus-network
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_PROXY_URL=http://yugaplus-backend:8080
+networks:
+  yugaplus-network:
+    external: true    
