@@ -110,15 +110,22 @@ public class MovieController {
 
         params.put("max_results", MAX_RESULTS);
 
-        List<Movie> movies = jdbcClient.sql(query.toString())
-                .params(params)
-                .query(Movie.class).list();
+        try {
+            List<Movie> movies = jdbcClient.sql(query.toString())
+                    .params(params)
+                    .query(Movie.class).list();
 
-        if (movies.isEmpty()) {
+            if (movies.isEmpty()) {
+                return new MovieResponse(
+                        new Status(false, HttpServletResponse.SC_NOT_FOUND, "No movies found. Try another phrase."),
+                        null);
+            }
+
+            return new MovieResponse(new Status(true, HttpServletResponse.SC_OK), movies);
+        } catch (Exception e) {
+            e.printStackTrace();
             return new MovieResponse(
-                    new Status(false, HttpServletResponse.SC_NOT_FOUND, "No movies found. Try another phrase."), null);
+                    new Status(false, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage()), null);
         }
-        
-        return new MovieResponse(new Status(true, HttpServletResponse.SC_OK), movies);
     }
 }
