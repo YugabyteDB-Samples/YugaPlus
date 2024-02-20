@@ -11,6 +11,7 @@ CREATE TABLE movie(
     original_language text,
     original_title text,
     overview text,
+    overview_lexemes tsvector,
     overview_vector vector(1536),
     popularity numeric,
     poster_path text,
@@ -27,3 +28,4 @@ CREATE TABLE movie(
     vote_average numeric,
     vote_count integer
 );
+
