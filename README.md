@@ -41,7 +41,7 @@ The pgvector extension is supported by a single-server PostgreSQL instance as we
     docker run --name postgres --net yugaplus-network \
         -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password \
         -p 5432:5432 \
-        -v ~/postgresql-volume/:/var/lib/postgresql/data \
+        -v ~/postgres-volume/:/var/lib/postgresql/data \
         -d ankane/pgvector:latest
     ```
 
