@@ -153,7 +153,7 @@ public class UserLibraryController {
         if (users.isEmpty()) {
             jdbcClient.sql("""
                     SELECT id, full_name, email, user_location
-                    FROM user
+                    FROM user_account
                     """).query(User.class).list().forEach(user -> {
                 users.put(user.getEmail(), user);
             });
