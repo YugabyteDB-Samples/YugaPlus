@@ -1,5 +1,6 @@
 package com.yugaplus.backend.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yugaplus.backend.api.Status;
@@ -18,6 +20,8 @@ import com.yugaplus.backend.api.UserLibraryResponse;
 import com.yugaplus.backend.config.SecurityConfig;
 import com.yugaplus.backend.config.UserRecord;
 import com.yugaplus.backend.model.Movie;
+import com.yugaplus.backend.model.User;
+
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
@@ -29,6 +33,8 @@ public class UserLibraryController {
     public UserLibraryController(JdbcClient jdbcClient) {
         this.jdbcClient = jdbcClient;
     }
+
+    private HashMap<String, User> users = new HashMap<>();
 
     @GetMapping("/load")
     public UserLibraryResponse getUserLibrary() {
@@ -45,24 +51,46 @@ public class UserLibraryController {
     }
 
     @PutMapping("/add/{movieId}")
-    public UserLibraryResponse addMovieToLibrary(@PathVariable Integer movieId) {
+    public UserLibraryResponse addMovieToLibrary(
+            @PathVariable Integer movieId,
+            @RequestParam(name = "user", required = false) String email) {
+
         Optional<UserRecord> authUser = SecurityConfig.getAuthenticatedUser();
 
         UUID userId;
+        String userLocation;
 
-        // FOR TESTING PURPOSES
         if (!authUser.isEmpty()) {
             userId = authUser.get().getUserId();
+            userLocation = authUser.get().getUserLocation();
         } else {
-            userId = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            // FOR DEMO PURPOSES ONLY
+            if (email == null || email.isBlank()) {
+                return new UserLibraryResponse(
+                        new Status(false, HttpServletResponse.SC_BAD_REQUEST,
+                                "User email is missing. Pass it via the 'user' parameter. "),
+                        null);
+            }
+
+            User user = loadUser(email);
+
+            if (user == null) {
+                return new UserLibraryResponse(
+                        new Status(false, HttpServletResponse.SC_NOT_FOUND,
+                                "User with email " + email + " not found. "),
+                        null);
+            }
+
+            userId = user.getId();
+            userLocation = user.getUserLocation();
         }
 
         try {
             long startTime = System.currentTimeMillis();
 
             jdbcClient.sql("""
-                    INSERT INTO user_library (user_id, movie_id) VALUES (?, ?)
-                    """).params(userId, movieId).update();
+                    INSERT INTO user_library (user_id, movie_id, user_location) VALUES (?, ?, ?)
+                    """).params(userId, movieId, userLocation).update();
 
             long execTime = System.currentTimeMillis() - startTime;
 
@@ -74,22 +102,43 @@ public class UserLibraryController {
     }
 
     @DeleteMapping("/remove/{movieId}")
-    public UserLibraryResponse removeMovieFromLibrary(@PathVariable Integer movieId) {
+    public UserLibraryResponse removeMovieFromLibrary(
+            @PathVariable Integer movieId,
+            @RequestParam(name = "user", required = false) String email) {
         Optional<UserRecord> authUser = SecurityConfig.getAuthenticatedUser();
 
         UUID userId;
+        String userLocation;
 
-        // FOR TESTING PURPOSES
         if (!authUser.isEmpty()) {
             userId = authUser.get().getUserId();
+            userLocation = authUser.get().getUserLocation();
         } else {
-            userId = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            // FOR DEMO PURPOSES ONLY
+            if (email == null || email.isBlank()) {
+                return new UserLibraryResponse(
+                        new Status(false, HttpServletResponse.SC_BAD_REQUEST,
+                                "User email is missing. Pass it via the 'user' parameter. "),
+                        null);
+            }
+
+            User user = loadUser(email);
+
+            if (user == null) {
+                return new UserLibraryResponse(
+                        new Status(false, HttpServletResponse.SC_NOT_FOUND,
+                                "User with email " + email + " not found. "),
+                        null);
+            }
+
+            userId = user.getId();
+            userLocation = user.getUserLocation();
         }
 
         try {
             jdbcClient.sql("""
-                    DELETE FROM user_library WHERE user_id = ? AND movie_id = ?
-                    """).params(userId, movieId).update();
+                    DELETE FROM user_library WHERE user_id = ? AND movie_id = ? AND user_location = ?
+                    """).params(userId, movieId, userLocation).update();
             return new UserLibraryResponse(new Status(true, HttpServletResponse.SC_OK), null);
         } catch (Exception e) {
             return new UserLibraryResponse(new Status(true, HttpServletResponse.SC_INTERNAL_SERVER_ERROR), null);
@@ -98,5 +147,18 @@ public class UserLibraryController {
 
     static String formatDatabaseLatency(long execTime) {
         return String.format("latency is %.3f seconds", (float) execTime / 1000);
+    }
+
+    private User loadUser(String email) {
+        if (users.isEmpty()) {
+            jdbcClient.sql("""
+                    SELECT id, full_name, email, user_location
+                    FROM user
+                    """).query(User.class).list().forEach(user -> {
+                users.put(user.getEmail(), user);
+            });
+        }
+
+        return users.get(email);
     }
 }
